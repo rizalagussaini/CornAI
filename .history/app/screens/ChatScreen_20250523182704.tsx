@@ -1,4 +1,3 @@
-import { Audio } from 'expo-av';
 import React, { useState } from 'react';
 import {
   View,
@@ -12,12 +11,10 @@ import {
   Text,
 } from 'react-native';
 import ChatBubble from '../../components/ChatBubble';
-import * as ImagePicker from 'expo-image-picker';
 
 type ChatMessage = {
   id: string;
-  message?: string;
-  image?: string;
+  message: string;
   isUser: boolean;
   isOption?: boolean;
   type?: string;
@@ -27,36 +24,14 @@ export default function ChatScreen() {
   const [messages, setMessages] = useState<ChatMessage[]>([
     {
       id: '0',
-      message:
-        'Halo! 🌽 Saya CornAI. Bagaimana saya bisa bantu hari ini? Silakan pilih salah satu opsi berikut:',
+      message: 'Halo! 🌽 Saya CornAI. Bagaimana saya bisa bantu hari ini? Silakan pilih salah satu opsi berikut:',
       isUser: false,
     },
-    {
-      id: '1',
-      message: '📊 Analisis Data Tanaman',
-      isUser: false,
-      isOption: true,
-      type: 'analisis',
-    },
-    {
-      id: '2',
-      message: '🤖 Rekomendasi AI',
-      isUser: false,
-      isOption: true,
-      type: 'ai',
-    },
-    {
-      id: '3',
-      message: '🌤️ Cek Prakiraan Cuaca',
-      isUser: false,
-      isOption: true,
-      type: 'cuaca',
-    },
+    { id: '1', message: '📊 Analisis Data Tanaman', isUser: false, isOption: true, type: 'analisis' },
+    { id: '2', message: '🤖 Rekomendasi AI', isUser: false, isOption: true, type: 'ai' },
+    { id: '3', message: '🌤️ Cek Prakiraan Cuaca', isUser: false, isOption: true, type: 'cuaca' },
   ]);
-
   const [input, setInput] = useState('');
-  const [recording, setRecording] = useState<Audio.Recording | null>(null);
-  const [isRecording, setIsRecording] = useState(false);
 
   const handleOption = (type: string, message: string) => {
     const userMsg = { id: Date.now().toString(), message, isUser: true };
@@ -91,6 +66,8 @@ export default function ChatScreen() {
     setInput('');
   };
 
+  import * as ImagePicker from 'expo-image-picker';
+
   const handleImageUpload = async () => {
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
@@ -113,43 +90,6 @@ export default function ChatScreen() {
     }
   };
 
-  const startRecording = async () => {
-    try {
-      await Audio.requestPermissionsAsync();
-      await Audio.setAudioModeAsync({
-        allowsRecordingIOS: true,
-        playsInSilentModeIOS: true,
-      });
-
-      const { recording } = await Audio.Recording.createAsync(
-        Audio.RecordingOptionsPresets.HIGH_QUALITY
-      );
-      setRecording(recording);
-      setIsRecording(true);
-    } catch (err) {
-      console.error('Failed to start recording', err);
-    }
-  };
-
-  const stopRecording = async () => {
-    if (!recording) return;
-    setIsRecording(false);
-    await recording.stopAndUnloadAsync();
-    const uri = recording.getURI();
-    setRecording(null);
-
-    if (uri) {
-      setMessages(prev => [
-        ...prev,
-        { id: Date.now().toString(), message: '[Pesan Suara]', isUser: true },
-        {
-          id: Date.now().toString(),
-          message: '🎧 Saya menerima pesan suara Anda! (simulasi)',
-          isUser: false,
-        },
-      ]);
-    }
-  };
 
   return (
     <KeyboardAvoidingView
@@ -160,19 +100,14 @@ export default function ChatScreen() {
         data={messages}
         keyExtractor={item => item.id}
         renderItem={({ item }) =>
-          item.image ? (
-            <View style={[styles.chatBubbleContainer, item.isUser ? styles.userAlign : styles.botAlign]}>
-              <Image
-                source={{ uri: item.image }}
-                style={{ width: 180, height: 180, borderRadius: 8 }}
-              />
-            </View>
-          ) : item.isOption ? (
-            <TouchableOpacity onPress={() => handleOption(item.type || '', item.message || '')}>
-              <ChatBubble message={item.message || ''} isUser={false} />
+          item.isOption ? (
+            <TouchableOpacity
+              onPress={() => handleOption(item.type || '', item.message)}
+            >
+              <ChatBubble message={item.message} isUser={false} />
             </TouchableOpacity>
           ) : (
-            <ChatBubble message={item.message || ''} isUser={item.isUser} />
+            <ChatBubble message={item.message} isUser={item.isUser} />
           )
         }
         contentContainerStyle={styles.chat}
@@ -186,23 +121,14 @@ export default function ChatScreen() {
         }
       />
       <View style={styles.inputContainer}>
-        <TouchableOpacity onPress={handleImageUpload} style={{ marginRight: 8 }}>
-          <Text style={{ fontSize: 18 }}>📷</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity onPress={isRecording ? stopRecording : startRecording} style={{ marginRight: 8 }}>
-          <Text style={{ fontSize: 18 }}>{isRecording ? '⏹️' : '🎤'}</Text>
-        </TouchableOpacity>
-
         <TextInput
           value={input}
           onChangeText={setInput}
           style={styles.input}
           placeholder="Kirim pesan..."
         />
-
         <TouchableOpacity onPress={sendMessage}>
-          <Text style={styles.sendButton}>➕</Text>
+          <Text style={styles.sendButton}>Kirim</Text>
         </TouchableOpacity>
       </View>
     </KeyboardAvoidingView>
@@ -250,15 +176,5 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     borderRadius: 16,
     overflow: 'hidden',
-  },
-  chatBubbleContainer: {
-    marginVertical: 4,
-    maxWidth: '80%',
-  },
-  userAlign: {
-    alignSelf: 'flex-end',
-  },
-  botAlign: {
-    alignSelf: 'flex-start',
   },
 });

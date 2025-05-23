@@ -1,4 +1,4 @@
-import { Audio } from 'expo-av';
+
 import React, { useState } from 'react';
 import {
   View,
@@ -55,8 +55,6 @@ export default function ChatScreen() {
   ]);
 
   const [input, setInput] = useState('');
-  const [recording, setRecording] = useState<Audio.Recording | null>(null);
-  const [isRecording, setIsRecording] = useState(false);
 
   const handleOption = (type: string, message: string) => {
     const userMsg = { id: Date.now().toString(), message, isUser: true };
@@ -113,44 +111,6 @@ export default function ChatScreen() {
     }
   };
 
-  const startRecording = async () => {
-    try {
-      await Audio.requestPermissionsAsync();
-      await Audio.setAudioModeAsync({
-        allowsRecordingIOS: true,
-        playsInSilentModeIOS: true,
-      });
-
-      const { recording } = await Audio.Recording.createAsync(
-        Audio.RecordingOptionsPresets.HIGH_QUALITY
-      );
-      setRecording(recording);
-      setIsRecording(true);
-    } catch (err) {
-      console.error('Failed to start recording', err);
-    }
-  };
-
-  const stopRecording = async () => {
-    if (!recording) return;
-    setIsRecording(false);
-    await recording.stopAndUnloadAsync();
-    const uri = recording.getURI();
-    setRecording(null);
-
-    if (uri) {
-      setMessages(prev => [
-        ...prev,
-        { id: Date.now().toString(), message: '[Pesan Suara]', isUser: true },
-        {
-          id: Date.now().toString(),
-          message: '🎧 Saya menerima pesan suara Anda! (simulasi)',
-          isUser: false,
-        },
-      ]);
-    }
-  };
-
   return (
     <KeyboardAvoidingView
       style={styles.container}
@@ -189,20 +149,14 @@ export default function ChatScreen() {
         <TouchableOpacity onPress={handleImageUpload} style={{ marginRight: 8 }}>
           <Text style={{ fontSize: 18 }}>📷</Text>
         </TouchableOpacity>
-
-        <TouchableOpacity onPress={isRecording ? stopRecording : startRecording} style={{ marginRight: 8 }}>
-          <Text style={{ fontSize: 18 }}>{isRecording ? '⏹️' : '🎤'}</Text>
-        </TouchableOpacity>
-
         <TextInput
           value={input}
           onChangeText={setInput}
           style={styles.input}
           placeholder="Kirim pesan..."
         />
-
         <TouchableOpacity onPress={sendMessage}>
-          <Text style={styles.sendButton}>➕</Text>
+          <Text style={styles.sendButton}>Kirim</Text>
         </TouchableOpacity>
       </View>
     </KeyboardAvoidingView>

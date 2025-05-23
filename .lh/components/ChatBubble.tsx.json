@@ -3,7 +3,7 @@
     "activeCommit": 0,
     "commits": [
         {
-            "activePatchIndex": 7,
+            "activePatchIndex": 8,
             "patches": [
                 {
                     "date": 1747986071020,
@@ -36,6 +36,10 @@
                 {
                     "date": 1747994916645,
                     "content": "Index: \n===================================================================\n--- \n+++ \n@@ -1,7 +1,8 @@\n import React from 'react';\r\n-import { View, Text, StyleSheet } from 'react-native';\r\n+import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';\r\n \r\n+\r\n interface ChatBubbleProps {\r\n   message: string;\r\n   isUser: boolean;\r\n   onPress?: () => void;\r\n"
+                },
+                {
+                    "date": 1748000509394,
+                    "content": "Index: \n===================================================================\n--- \n+++ \n@@ -1,8 +1,7 @@\n import React from 'react';\r\n import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';\r\n \r\n-\r\n interface ChatBubbleProps {\r\n   message: string;\r\n   isUser: boolean;\r\n   onPress?: () => void;\r\n@@ -12,9 +11,12 @@\n   const Wrapper = onPress ? TouchableOpacity : View;\r\n \r\n   return (\r\n     <View style={[styles.container, isUser ? styles.right : styles.left]}>\r\n-      <Wrapper style={[styles.bubble, isUser ? styles.userBubble : styles.botBubble]} onPress={onPress}>\r\n+      <Wrapper\r\n+        style={[styles.bubble, isUser ? styles.userBubble : styles.botBubble]}\r\n+        onPress={onPress}\r\n+      >\r\n         <Text style={styles.text}>{message}</Text>\r\n       </Wrapper>\r\n     </View>\r\n   );\r\n@@ -22,25 +24,25 @@\n \r\n const styles = StyleSheet.create({\r\n   container: {\r\n     marginVertical: 4,\r\n+    maxWidth: '80%',\r\n   },\r\n   right: {\r\n-    alignItems: 'flex-end',\r\n+    alignSelf: 'flex-end',\r\n   },\r\n   left: {\r\n-    alignItems: 'flex-start',\r\n+    alignSelf: 'flex-start',\r\n   },\r\n   bubble: {\r\n-    maxWidth: '80%',\r\n     padding: 10,\r\n     borderRadius: 12,\r\n   },\r\n   userBubble: {\r\n-    backgroundColor: '#c7d8ff',\r\n+    backgroundColor: '#dcf8c6',\r\n   },\r\n   botBubble: {\r\n-    backgroundColor: '#f1f1f1',\r\n+    backgroundColor: '#f1f0f0',\r\n   },\r\n   text: {\r\n     fontSize: 14,\r\n     color: '#333',\r\n"
                 }
             ],
             "date": 1747986071020,

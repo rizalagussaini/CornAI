@@ -12,10 +12,7 @@ const ChatBubble: React.FC<ChatBubbleProps> = ({ message, isUser, onPress }) => 
 
   return (
     <View style={[styles.container, isUser ? styles.right : styles.left]}>
-      <Wrapper
-        style={[styles.bubble, isUser ? styles.userBubble : styles.botBubble]}
-        onPress={onPress}
-      >
+      <Wrapper style={[styles.bubble, isUser ? styles.userBubble : styles.botBubble]} onPress={onPress}>
         <Text style={styles.text}>{message}</Text>
       </Wrapper>
     </View>
@@ -25,23 +22,23 @@ const ChatBubble: React.FC<ChatBubbleProps> = ({ message, isUser, onPress }) => 
 const styles = StyleSheet.create({
   container: {
     marginVertical: 4,
-    maxWidth: '80%',
   },
   right: {
-    alignSelf: 'flex-end',
+    alignItems: 'flex-end',
   },
   left: {
-    alignSelf: 'flex-start',
+    alignItems: 'flex-start',
   },
   bubble: {
+    maxWidth: '80%',
     padding: 10,
     borderRadius: 12,
   },
   userBubble: {
-    backgroundColor: '#dcf8c6',
+    backgroundColor: '#c7d8ff',
   },
   botBubble: {
-    backgroundColor: '#f1f0f0',
+    backgroundColor: '#f1f1f1',
   },
   text: {
     fontSize: 14,
