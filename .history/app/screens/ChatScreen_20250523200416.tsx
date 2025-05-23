@@ -178,7 +178,7 @@ export default function ChatScreen() {
             <ChatBubble message={item.message || ''} isUser={item.isUser} />
           )
         }
-        
+        contentContainerStyle={styles.chat}
         ListHeaderComponent={
           <View style={styles.header}>
             <Image

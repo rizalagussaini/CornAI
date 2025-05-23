@@ -188,26 +188,7 @@ export default function ChatScreen() {
           </View>
         }
       />
-      <View style={styles.inputContainer}>
-        <TouchableOpacity onPress={handleImageUpload} style={{ marginRight: 8 }}>
-          <Text style={{ fontSize: 18 }}>📷</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity onPress={isRecording ? stopRecording : startRecording} style={{ marginRight: 8 }}>
-          <Text style={{ fontSize: 18 }}>{isRecording ? '⏹️' : '🎤'}</Text>
-        </TouchableOpacity>
-
-        <TextInput
-          value={input}
-          onChangeText={setInput}
-          style={styles.input}
-          placeholder="Kirim pesan..."
-        />
-
-        <TouchableOpacity onPress={sendMessage}>
-          <Text style={styles.sendButton}>➕</Text>
-        </TouchableOpacity>
-      </View>
+      
     </KeyboardAvoidingView>
   );
 }

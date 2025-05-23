@@ -159,15 +159,12 @@ export default function ChatScreen() {
       <FlatList
         data={messages}
         keyExtractor={item => item.id}
-        keyboardShouldPersistTaps="handled"
-        contentContainerStyle={[styles.chat, { paddingBottom: 100 }]}
         renderItem={({ item }) =>
           item.image ? (
             <View style={[styles.chatBubbleContainer, item.isUser ? styles.userAlign : styles.botAlign]}>
               <Image
                 source={{ uri: item.image }}
                 style={{ width: 180, height: 180, borderRadius: 8 }}
-                
               />
             </View>
           ) : item.isOption ? (
@@ -178,7 +175,7 @@ export default function ChatScreen() {
             <ChatBubble message={item.message || ''} isUser={item.isUser} />
           )
         }
-        
+        contentContainerStyle={styles.chat}
         ListHeaderComponent={
           <View style={styles.header}>
             <Image
