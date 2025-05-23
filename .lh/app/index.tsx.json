@@ -1,0 +1,18 @@
+{
+    "sourceFile": "app/index.tsx",
+    "activeCommit": 0,
+    "commits": [
+        {
+            "activePatchIndex": 0,
+            "patches": [
+                {
+                    "date": 1747991159347,
+                    "content": "Index: \n===================================================================\n--- \n+++ \n"
+                }
+            ],
+            "date": 1747991159347,
+            "name": "Commit-0",
+            "content": "import HomeScreen from './screens/HomeScreen';\n\nexport default HomeScreen;\n"
+        }
+    ]
+}
