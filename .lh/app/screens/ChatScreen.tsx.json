@@ -3,7 +3,7 @@
     "activeCommit": 0,
     "commits": [
         {
-            "activePatchIndex": 43,
+            "activePatchIndex": 59,
             "patches": [
                 {
                     "date": 1747986094322,
@@ -180,6 +180,70 @@
                 {
                     "date": 1748006265186,
                     "content": "Index: \n===================================================================\n--- \n+++ \n@@ -187,9 +187,28 @@\n             />\r\n           </View>\r\n         }\r\n       />\r\n-      \r\n+      <View style={styles.inputContainer}>\r\n+        <TouchableOpacity onPress={handleImageUpload} style={{ marginRight: 8 }}>\r\n+          <Text style={{ fontSize: 18 }}>📷</Text>\r\n+        </TouchableOpacity>\r\n+\r\n+        <TouchableOpacity onPress={isRecording ? stopRecording : startRecording} style={{ marginRight: 8 }}>\r\n+          <Text style={{ fontSize: 18 }}>{isRecording ? '⏹️' : '🎤'}</Text>\r\n+        </TouchableOpacity>\r\n+\r\n+        <TextInput\r\n+          value={input}\r\n+          onChangeText={setInput}\r\n+          style={styles.input}\r\n+          placeholder=\"Kirim pesan...\"\r\n+        />\r\n+\r\n+        <TouchableOpacity onPress={sendMessage}>\r\n+          <Text style={styles.sendButton}>➕</Text>\r\n+        </TouchableOpacity>\r\n+      </View>\r\n     </KeyboardAvoidingView>\r\n   );\r\n }\r\n \r\n"
+                },
+                {
+                    "date": 1748066635571,
+                    "content": "Index: \n===================================================================\n--- \n+++ \n@@ -1,5 +1,5 @@\n-import { Audio } from 'expo-av';\r\n+import { Audio } from 'expo-av'; // untuk fitur rekam audio\r\n import React, { useState } from 'react';\r\n import {\r\n   View,\r\n   TextInput,\r\n"
+                },
+                {
+                    "date": 1748066683662,
+                    "content": "Index: \n===================================================================\n--- \n+++ \n@@ -22,8 +22,9 @@\n   isOption?: boolean;\r\n   type?: string;\r\n };\r\n \r\n+// Komponen utama ChatScreen\r\n export default function ChatScreen() {\r\n   const [messages, setMessages] = useState<ChatMessage[]>([\r\n     {\r\n       id: '0',\r\n"
+                },
+                {
+                    "date": 1748066703498,
+                    "content": "Index: \n===================================================================\n--- \n+++ \n@@ -35,9 +35,9 @@\n     {\r\n       id: '1',\r\n       message: '📊 Analisis Data Tanaman',\r\n       isUser: false,\r\n-      isOption: true,\r\n+      isOption: true, \r\n       type: 'analisis',\r\n     },\r\n     {\r\n       id: '2',\r\n"
+                },
+                {
+                    "date": 1748066731953,
+                    "content": "Index: \n===================================================================\n--- \n+++ \n@@ -35,9 +35,9 @@\n     {\r\n       id: '1',\r\n       message: '📊 Analisis Data Tanaman',\r\n       isUser: false,\r\n-      isOption: true, \r\n+      isOption: true, // pesan ini bisa diklik sebagai opsi\r\n       type: 'analisis',\r\n     },\r\n     {\r\n       id: '2',\r\n@@ -54,8 +54,9 @@\n       type: 'cuaca',\r\n     },\r\n   ]);\r\n \r\n+  \r\n   const [input, setInput] = useState('');\r\n   const [recording, setRecording] = useState<Audio.Recording | null>(null);\r\n   const [isRecording, setIsRecording] = useState(false);\r\n \r\n"
+                },
+                {
+                    "date": 1748066745101,
+                    "content": "Index: \n===================================================================\n--- \n+++ \n@@ -54,10 +54,11 @@\n       type: 'cuaca',\r\n     },\r\n   ]);\r\n \r\n-  \r\n+  // State untuk menyimpan input teks dari user\r\n   const [input, setInput] = useState('');\r\n+    // State untuk menyimpan objek rekaman audio (null jika tidak ada)\r\n   const [recording, setRecording] = useState<Audio.Recording | null>(null);\r\n   const [isRecording, setIsRecording] = useState(false);\r\n \r\n   const handleOption = (type: string, message: string) => {\r\n"
+                },
+                {
+                    "date": 1748066764575,
+                    "content": "Index: \n===================================================================\n--- \n+++ \n@@ -56,10 +56,11 @@\n   ]);\r\n \r\n   // State untuk menyimpan input teks dari user\r\n   const [input, setInput] = useState('');\r\n-    // State untuk menyimpan objek rekaman audio (null jika tidak ada)\r\n+  // State untuk menyimpan objek rekaman audio (null jika tidak ada)\r\n   const [recording, setRecording] = useState<Audio.Recording | null>(null);\r\n+   // State untuk status apakah sedang merekam audio atau tidak\r\n   const [isRecording, setIsRecording] = useState(false);\r\n \r\n   const handleOption = (type: string, message: string) => {\r\n     const userMsg = { id: Date.now().toString(), message, isUser: true };\r\n"
+                },
+                {
+                    "date": 1748066777975,
+                    "content": "Index: \n===================================================================\n--- \n+++ \n@@ -60,9 +60,9 @@\n   // State untuk menyimpan objek rekaman audio (null jika tidak ada)\r\n   const [recording, setRecording] = useState<Audio.Recording | null>(null);\r\n    // State untuk status apakah sedang merekam audio atau tidak\r\n   const [isRecording, setIsRecording] = useState(false);\r\n-\r\n+// Fungsi saat user memilih salah satu opsi (analisis, ai, cuaca)\r\n   const handleOption = (type: string, message: string) => {\r\n     const userMsg = { id: Date.now().toString(), message, isUser: true };\r\n     setMessages(prev => [...prev, userMsg]);\r\n \r\n"
+                },
+                {
+                    "date": 1748066791822,
+                    "content": "Index: \n===================================================================\n--- \n+++ \n@@ -58,11 +58,12 @@\n   // State untuk menyimpan input teks dari user\r\n   const [input, setInput] = useState('');\r\n   // State untuk menyimpan objek rekaman audio (null jika tidak ada)\r\n   const [recording, setRecording] = useState<Audio.Recording | null>(null);\r\n-   // State untuk status apakah sedang merekam audio atau tidak\r\n+  \r\n+  // State untuk status apakah sedang merekam audio atau tidak\r\n   const [isRecording, setIsRecording] = useState(false);\r\n-// Fungsi saat user memilih salah satu opsi (analisis, ai, cuaca)\r\n+  // Fungsi saat user memilih salah satu opsi (analisis, ai, cuaca)\r\n   const handleOption = (type: string, message: string) => {\r\n     const userMsg = { id: Date.now().toString(), message, isUser: true };\r\n     setMessages(prev => [...prev, userMsg]);\r\n \r\n"
+                },
+                {
+                    "date": 1748066803636,
+                    "content": "Index: \n===================================================================\n--- \n+++ \n@@ -58,11 +58,11 @@\n   // State untuk menyimpan input teks dari user\r\n   const [input, setInput] = useState('');\r\n   // State untuk menyimpan objek rekaman audio (null jika tidak ada)\r\n   const [recording, setRecording] = useState<Audio.Recording | null>(null);\r\n-  \r\n   // State untuk status apakah sedang merekam audio atau tidak\r\n   const [isRecording, setIsRecording] = useState(false);\r\n+  \r\n   // Fungsi saat user memilih salah satu opsi (analisis, ai, cuaca)\r\n   const handleOption = (type: string, message: string) => {\r\n     const userMsg = { id: Date.now().toString(), message, isUser: true };\r\n     setMessages(prev => [...prev, userMsg]);\r\n"
+                },
+                {
+                    "date": 1748066871571,
+                    "content": "Index: \n===================================================================\n--- \n+++ \n@@ -56,15 +56,18 @@\n   ]);\r\n \r\n   // State untuk menyimpan input teks dari user\r\n   const [input, setInput] = useState('');\r\n+\r\n   // State untuk menyimpan objek rekaman audio (null jika tidak ada)\r\n   const [recording, setRecording] = useState<Audio.Recording | null>(null);\r\n+\r\n   // State untuk status apakah sedang merekam audio atau tidak\r\n   const [isRecording, setIsRecording] = useState(false);\r\n-  \r\n+\r\n   // Fungsi saat user memilih salah satu opsi (analisis, ai, cuaca)\r\n   const handleOption = (type: string, message: string) => {\r\n+    \r\n     const userMsg = { id: Date.now().toString(), message, isUser: true };\r\n     setMessages(prev => [...prev, userMsg]);\r\n \r\n     setTimeout(() => {\r\n"
+                },
+                {
+                    "date": 1748066938367,
+                    "content": "Index: \n===================================================================\n--- \n+++ \n@@ -65,9 +65,9 @@\n   const [isRecording, setIsRecording] = useState(false);\r\n \r\n   // Fungsi saat user memilih salah satu opsi (analisis, ai, cuaca)\r\n   const handleOption = (type: string, message: string) => {\r\n-    \r\n+    // Tambahkan pesan dari user ke daftar pesan\r\n     const userMsg = { id: Date.now().toString(), message, isUser: true };\r\n     setMessages(prev => [...prev, userMsg]);\r\n \r\n     setTimeout(() => {\r\n"
+                },
+                {
+                    "date": 1748066956661,
+                    "content": "Index: \n===================================================================\n--- \n+++ \n@@ -67,8 +67,9 @@\n   // Fungsi saat user memilih salah satu opsi (analisis, ai, cuaca)\r\n   const handleOption = (type: string, message: string) => {\r\n     // Tambahkan pesan dari user ke daftar pesan\r\n     const userMsg = { id: Date.now().toString(), message, isUser: true };\r\n+    // Setelah 800ms, tambahkan balasan dari bot sesuai tipe opsi\r\n     setMessages(prev => [...prev, userMsg]);\r\n \r\n     setTimeout(() => {\r\n       const botMsg = {\r\n"
+                },
+                {
+                    "date": 1748066986223,
+                    "content": "Index: \n===================================================================\n--- \n+++ \n@@ -85,8 +85,9 @@\n       setMessages(prev => [...prev, botMsg]);\r\n     }, 800);\r\n   };\r\n \r\n+  \r\n   const sendMessage = () => {\r\n     if (!input.trim()) return;\r\n     setMessages(prev => [\r\n       ...prev,\r\n"
+                },
+                {
+                    "date": 1748067015724,
+                    "content": "Index: \n===================================================================\n--- \n+++ \n@@ -85,10 +85,11 @@\n       setMessages(prev => [...prev, botMsg]);\r\n     }, 800);\r\n   };\r\n \r\n-  \r\n+  // Fungsi untuk mengirim pesan teks yang diketik user\r\n   const sendMessage = () => {\r\n+    \r\n     if (!input.trim()) return;\r\n     setMessages(prev => [\r\n       ...prev,\r\n       { id: Date.now().toString(), message: input, isUser: true },\r\n"
+                },
+                {
+                    "date": 1748067033737,
+                    "content": "Index: \n===================================================================\n--- \n+++ \n@@ -89,9 +89,9 @@\n   // Fungsi untuk mengirim pesan teks yang diketik user\r\n   const sendMessage = () => {\r\n     // Jika input kosong (atau hanya spasi), jangan lakukan apa-apa\r\n     if (!input.trim()) return;\r\n-    \r\n+    // Tambahkan pesan user dan balasan bot ke daftar pesan\r\n     setMessages(prev => [\r\n       ...prev,\r\n       { id: Date.now().toString(), message: input, isUser: true },\r\n       {\r\n"
+                },
+                {
+                    "date": 1748067144744,
+                    "content": "Index: \n===================================================================\n--- \n+++ \n@@ -131,9 +131,9 @@\n   };\r\n \r\n   // Fungsi untuk mulai rekaman suara\r\n   const startRecording = async () => {\r\n-    \r\n+    // Minta izin akses mikrofon\r\n     try {\r\n       await Audio.requestPermissionsAsync();\r\n       await Audio.setAudioModeAsync({\r\n         allowsRecordingIOS: true,\r\n"
                 }
             ],
             "date": 1747986094322,

@@ -292,6 +292,6 @@ const styles = StyleSheet.create({
     alignSelf: 'flex-end', // pesan user rata kanan
   },
   botAlign: {
-    alignSelf: 'flex-start', // pesan bot rata kiri
+    alignSelf: 'flex-start',
   },
 });

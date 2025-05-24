@@ -277,7 +277,7 @@ const styles = StyleSheet.create({
     height: 40,
   },
   sendButton: {
-    backgroundColor: '#4CAF50', // hijau
+    backgroundColor: '#4CAF50', 
     color: '#fff',
     paddingVertical: 8,
     paddingHorizontal: 16,
@@ -286,12 +286,12 @@ const styles = StyleSheet.create({
   },
   chatBubbleContainer: {
     marginVertical: 4,
-    maxWidth: '80%', // maksimal lebar balon chat
+    maxWidth: '80%',
   },
   userAlign: {
-    alignSelf: 'flex-end', // pesan user rata kanan
+    alignSelf: 'flex-end',
   },
   botAlign: {
-    alignSelf: 'flex-start', // pesan bot rata kiri
+    alignSelf: 'flex-start',
   },
 });

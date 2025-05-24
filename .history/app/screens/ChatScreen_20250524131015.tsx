@@ -90,7 +90,6 @@ export default function ChatScreen() {
   const sendMessage = () => {
     // Jika input kosong (atau hanya spasi), jangan lakukan apa-apa
     if (!input.trim()) return;
-    // Tambahkan pesan user dan balasan bot ke daftar pesan
     setMessages(prev => [
       ...prev,
       { id: Date.now().toString(), message: input, isUser: true },
@@ -100,24 +99,19 @@ export default function ChatScreen() {
         isUser: false,
       },
     ]);
-    // Kosongkan input setelah mengirim
     setInput('');
   };
 
-  // Fungsi untuk memilih gambar dari galeri dan mengirim ke chat
   const handleImageUpload = async () => {
-    // Buka galeri dan pilih gambar dengan kualitas 0.7 (70%)
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
       allowsEditing: true,
       quality: 0.7,
     });
 
-    // Jika user tidak batal dan memilih gambar
     if (!result.canceled && result.assets.length > 0) {
       const selectedImage = result.assets[0].uri;
 
-      // Tambahkan gambar user dan pesan bot balasan ke daftar pesan
       setMessages(prev => [
         ...prev,
         { id: Date.now().toString(), image: selectedImage, isUser: true },
@@ -130,24 +124,17 @@ export default function ChatScreen() {
     }
   };
 
-  // Fungsi untuk mulai rekaman suara
   const startRecording = async () => {
     try {
-      // Minta izin akses mikrofon
       await Audio.requestPermissionsAsync();
-
-      // Set mode audio supaya bisa rekam di iOS
       await Audio.setAudioModeAsync({
         allowsRecordingIOS: true,
         playsInSilentModeIOS: true,
       });
 
-      // Mulai rekaman dengan kualitas tinggi
       const { recording } = await Audio.Recording.createAsync(
         Audio.RecordingOptionsPresets.HIGH_QUALITY
       );
-
-      // Simpan objek rekaman dan set status rekam true
       setRecording(recording);
       setIsRecording(true);
     } catch (err) {
@@ -155,17 +142,14 @@ export default function ChatScreen() {
     }
   };
 
-  // Ambil URI file audio yang direkam
   const stopRecording = async () => {
     if (!recording) return;
-    setIsRecording(false); 
-    await recording.stopAndUnloadAsync(); // Hapus objek rekaman dari state
-    const uri = recording.getURI(); // Ambil URI file audio yang direkam
+    setIsRecording(false);
+    await recording.stopAndUnloadAsync();
+    const uri = recording.getURI();
     setRecording(null);
 
-    // Jika ada file rekaman
     if (uri) {
-      // Tambahkan pesan suara ke chat dan balasan bot (simulasi)
       setMessages(prev => [
         ...prev,
         { id: Date.now().toString(), message: '[Pesan Suara]', isUser: true },
@@ -178,9 +162,7 @@ export default function ChatScreen() {
     }
   };
 
-  // Bagian tampilan utama (UI)
   return (
-    // KeyboardAvoidingView supaya keyboard tidak menutupi input di iOS
     <KeyboardAvoidingView
       style={styles.container}
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
@@ -241,43 +223,42 @@ export default function ChatScreen() {
   );
 }
 
-// Style untuk tampilan
 const styles = StyleSheet.create({
   container: {
-    flex: 1, // memanfaatkan seluruh layar
-    backgroundColor: '#fff', // background putih
+    flex: 1,
+    backgroundColor: '#fff',
   },
   chat: {
-    padding: 10, // jarak dalam chat list
+    padding: 10,
   },
   header: {
-    alignItems: 'center', // rata tengah
+    alignItems: 'center',
     marginBottom: 10,
   },
   logo: {
     width: 80,
     height: 80,
-    borderRadius: 40, // bentuk lingkaran
+    borderRadius: 40,
     marginBottom: 10,
   },
   inputContainer: {
-    flexDirection: 'row', // komponen input berjajar secara horizontal
+    flexDirection: 'row',
     padding: 10,
     borderTopWidth: 1,
     borderColor: '#ddd',
     backgroundColor: '#f9f9f9',
-    alignItems: 'center', // rata tengah vertikal
+    alignItems: 'center',
   },
   input: {
-    flex: 1, // input mengambil ruang sebanyak mungkin
-    backgroundColor: '#f1f1f1', 
+    flex: 1,
+    backgroundColor: '#f1f1f1',
     paddingHorizontal: 15,
-    borderRadius: 20, // sudut membulat
+    borderRadius: 20,
     marginRight: 10,
     height: 40,
   },
   sendButton: {
-    backgroundColor: '#4CAF50', // hijau
+    backgroundColor: '#4CAF50',
     color: '#fff',
     paddingVertical: 8,
     paddingHorizontal: 16,
@@ -286,12 +267,12 @@ const styles = StyleSheet.create({
   },
   chatBubbleContainer: {
     marginVertical: 4,
-    maxWidth: '80%', // maksimal lebar balon chat
+    maxWidth: '80%',
   },
   userAlign: {
-    alignSelf: 'flex-end', // pesan user rata kanan
+    alignSelf: 'flex-end',
   },
   botAlign: {
-    alignSelf: 'flex-start', // pesan bot rata kiri
+    alignSelf: 'flex-start',
   },
 });

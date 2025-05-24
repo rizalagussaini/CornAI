@@ -257,27 +257,27 @@ const styles = StyleSheet.create({
   logo: {
     width: 80,
     height: 80,
-    borderRadius: 40, // bentuk lingkaran
+    borderRadius: 40,
     marginBottom: 10,
   },
   inputContainer: {
-    flexDirection: 'row', // komponen input berjajar secara horizontal
+    flexDirection: 'row',
     padding: 10,
     borderTopWidth: 1,
     borderColor: '#ddd',
     backgroundColor: '#f9f9f9',
-    alignItems: 'center', // rata tengah vertikal
+    alignItems: 'center',
   },
   input: {
-    flex: 1, // input mengambil ruang sebanyak mungkin
-    backgroundColor: '#f1f1f1', 
+    flex: 1,
+    backgroundColor: '#f1f1f1',
     paddingHorizontal: 15,
-    borderRadius: 20, // sudut membulat
+    borderRadius: 20,
     marginRight: 10,
     height: 40,
   },
   sendButton: {
-    backgroundColor: '#4CAF50', // hijau
+    backgroundColor: '#4CAF50',
     color: '#fff',
     paddingVertical: 8,
     paddingHorizontal: 16,
@@ -286,12 +286,12 @@ const styles = StyleSheet.create({
   },
   chatBubbleContainer: {
     marginVertical: 4,
-    maxWidth: '80%', // maksimal lebar balon chat
+    maxWidth: '80%',
   },
   userAlign: {
-    alignSelf: 'flex-end', // pesan user rata kanan
+    alignSelf: 'flex-end',
   },
   botAlign: {
-    alignSelf: 'flex-start', // pesan bot rata kiri
+    alignSelf: 'flex-start',
   },
 });

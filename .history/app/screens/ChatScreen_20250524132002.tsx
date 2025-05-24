@@ -289,9 +289,9 @@ const styles = StyleSheet.create({
     maxWidth: '80%', // maksimal lebar balon chat
   },
   userAlign: {
-    alignSelf: 'flex-end', // pesan user rata kanan
+    alignSelf: 'flex-end',
   },
   botAlign: {
-    alignSelf: 'flex-start', // pesan bot rata kiri
+    alignSelf: 'flex-start',
   },
 });

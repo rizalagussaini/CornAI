@@ -294,4 +294,5 @@ const styles = StyleSheet.create({
   botAlign: {
     alignSelf: 'flex-start', // pesan bot rata kiri
   },
+  },
 });

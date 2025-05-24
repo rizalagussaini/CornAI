@@ -286,12 +286,12 @@ const styles = StyleSheet.create({
   },
   chatBubbleContainer: {
     marginVertical: 4,
-    maxWidth: '80%', // maksimal lebar balon chat
+    maxWidth: '80%', 
   },
   userAlign: {
-    alignSelf: 'flex-end', // pesan user rata kanan
+    alignSelf: 'flex-end',
   },
   botAlign: {
-    alignSelf: 'flex-start', // pesan bot rata kiri
+    alignSelf: 'flex-start',
   },
 });
