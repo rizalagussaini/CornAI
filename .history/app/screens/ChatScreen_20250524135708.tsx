@@ -249,6 +249,7 @@ const styles = StyleSheet.create({
   },
   chat: {
     padding: 10, // jarak dalam chat list
+    paddingBottom: 100, // beri padding bawah untuk space floating bar
   },
   header: {
     alignItems: 'center', // rata tengah

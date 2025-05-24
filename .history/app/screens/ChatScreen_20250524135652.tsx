@@ -246,6 +246,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1, // memanfaatkan seluruh layar
     backgroundColor: '#fff', // background putih
+    paddingBottom: 100, // beri padding bawah untuk space floating bar
   },
   chat: {
     padding: 10, // jarak dalam chat list

@@ -55,6 +55,7 @@ export default function ChatScreen() {
     },
   ]);
 
+  
   // State untuk menyimpan input teks dari user
   const [input, setInput] = useState('');
 
@@ -66,9 +67,12 @@ export default function ChatScreen() {
 
   // Fungsi saat user memilih salah satu opsi (analisis, ai, cuaca)
   const handleOption = (type: string, message: string) => {
-    // Tambahkan pesan dari user ke daftar pesan
-    const userMsg = { id: Date.now().toString(), message, isUser: true };
-    // Setelah 800ms, tambahkan balasan dari bot sesuai tipe opsi
+
+  // Tambahkan pesan dari user ke daftar pesan
+  const userMsg = { id: Date.now().toString(), message, isUser: true };
+  
+
+  // Setelah 800ms, tambahkan balasan dari bot sesuai tipe opsi
     setMessages(prev => [...prev, userMsg]);
 
     setTimeout(() => {
@@ -100,6 +104,9 @@ export default function ChatScreen() {
         isUser: false,
       },
     ]);
+
+    // Set bot sedang mengetik (loading)
+    setIsBotTyping(true);
     // Kosongkan input setelah mengirim
     setInput('');
   };
@@ -189,7 +196,7 @@ export default function ChatScreen() {
         data={messages}
         keyExtractor={item => item.id}
         keyboardShouldPersistTaps="handled"
-        contentContainerStyle={[styles.chat, { paddingBottom: 100 }]}
+        contentContainerStyle={[styles.chat, { paddingBottom: 70 }]}
         renderItem={({ item }) =>
           item.image ? (
             <View style={[styles.chatBubbleContainer, item.isUser ? styles.userAlign : styles.botAlign]}>
@@ -249,6 +256,7 @@ const styles = StyleSheet.create({
   },
   chat: {
     padding: 10, // jarak dalam chat list
+    paddingBottom: 100, // beri padding bawah untuk space floating bar
   },
   header: {
     alignItems: 'center', // rata tengah
@@ -261,6 +269,10 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   inputContainer: {
+    position: 'absolute',   // posisi absolut supaya floating
+    bottom: 0,              // pas di bawah layar
+    left: 0,
+    right: 0,
     flexDirection: 'row', // komponen input berjajar secara horizontal
     padding: 10,
     borderTopWidth: 1,

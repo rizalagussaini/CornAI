@@ -55,6 +55,9 @@ export default function ChatScreen() {
     },
   ]);
 
+  // untuk tahu kapan bot sedang "mengetik" / loading
+  const [isBotTyping, setIsBotTyping] = useState(false);
+
   // State untuk menyimpan input teks dari user
   const [input, setInput] = useState('');
 
@@ -70,6 +73,8 @@ export default function ChatScreen() {
     const userMsg = { id: Date.now().toString(), message, isUser: true };
     // Setelah 800ms, tambahkan balasan dari bot sesuai tipe opsi
     setMessages(prev => [...prev, userMsg]);
+    // Set bot sedang mengetik
+    setIsBotTyping(true);
 
     setTimeout(() => {
       const botMsg = {
@@ -83,6 +88,8 @@ export default function ChatScreen() {
         isUser: false,
       };
       setMessages(prev => [...prev, botMsg]);
+      // Sembunyikan loading indikator setelah balasan muncul
+      setIsBotTyping(false);
     }, 800);
   };
 
@@ -94,14 +101,29 @@ export default function ChatScreen() {
     setMessages(prev => [
       ...prev,
       { id: Date.now().toString(), message: input, isUser: true },
-      {
-        id: Date.now().toString(),
-        message: '🤖 Terima kasih! Saya sedang memproses informasi tersebut.',
-        isUser: false,
-      },
     ]);
+
+    // Set bot sedang mengetik (loading)
+    setIsBotTyping(true);
+
     // Kosongkan input setelah mengirim
     setInput('');
+
+    // Simulasikan delay balasan bot
+    // Simulasikan delay balasan bot (1.5 detik)
+    setTimeout(() => {
+      setMessages(prev => [
+        ...prev,
+        {
+          id: Date.now().toString(),
+          message: '🤖 Terima kasih! Saya sedang memproses informasi tersebut.',
+          isUser: false,
+        },
+      ]);
+      // Sembunyikan loading indikator setelah balasan muncul
+      setIsBotTyping(false);
+    }, 1500);
+    
   };
 
   // Fungsi untuk memilih gambar dari galeri dan mengirim ke chat
@@ -189,7 +211,7 @@ export default function ChatScreen() {
         data={messages}
         keyExtractor={item => item.id}
         keyboardShouldPersistTaps="handled"
-        contentContainerStyle={[styles.chat, { paddingBottom: 100 }]}
+        contentContainerStyle={[styles.chat, { paddingBottom: 70 }]}
         renderItem={({ item }) =>
           item.image ? (
             <View style={[styles.chatBubbleContainer, item.isUser ? styles.userAlign : styles.botAlign]}>
@@ -249,6 +271,7 @@ const styles = StyleSheet.create({
   },
   chat: {
     padding: 10, // jarak dalam chat list
+    paddingBottom: 100, // beri padding bawah untuk space floating bar
   },
   header: {
     alignItems: 'center', // rata tengah
@@ -261,6 +284,10 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   inputContainer: {
+    position: 'absolute',   // posisi absolut supaya floating
+    bottom: 0,              // pas di bawah layar
+    left: 0,
+    right: 0,
     flexDirection: 'row', // komponen input berjajar secara horizontal
     padding: 10,
     borderTopWidth: 1,
