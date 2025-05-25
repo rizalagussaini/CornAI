@@ -1,18 +1,18 @@
 import { Audio } from 'expo-av'; // untuk fitur rekam audio
-import * as ImagePicker from 'expo-image-picker';
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import {
+  View,
+  TextInput,
   FlatList,
-  Image,
   KeyboardAvoidingView,
   Platform,
   StyleSheet,
-  Text,
-  TextInput,
+  Image,
   TouchableOpacity,
-  View,
+  Text,
 } from 'react-native';
 import ChatBubble from '../../components/ChatBubble';
+import * as ImagePicker from 'expo-image-picker';
 
 type ChatMessage = {
   id: string;
@@ -69,6 +69,8 @@ export default function ChatScreen() {
 
   const flatListRef = useRef<FlatList>(null); // buat ref FlatList
 
+  
+
 
   // Fungsi saat user memilih salah satu opsi (analisis, ai, cuaca)
   const handleOption = (type: string, message: string) => {
@@ -86,8 +88,8 @@ export default function ChatScreen() {
           type === 'analisis'
             ? 'Silakan kirim gambar tanaman Anda 🌿'
             : type === 'ai'
-              ? 'Fitur AI akan segera tersedia.'
-              : 'Sedang mengambil data cuaca hari ini... 🌤️',
+            ? 'Fitur AI akan segera tersedia.'
+            : 'Sedang mengambil data cuaca hari ini... 🌤️',
         isUser: false,
       };
       setMessages(prev => [...prev, botMsg]);
@@ -126,7 +128,7 @@ export default function ChatScreen() {
       // Sembunyikan loading indikator setelah balasan muncul
       setIsBotTyping(false);
     }, 1500);
-
+    
   };
 
   // Fungsi untuk memilih gambar dari galeri dan mengirim ke chat
@@ -183,7 +185,7 @@ export default function ChatScreen() {
   // Ambil URI file audio yang direkam
   const stopRecording = async () => {
     if (!recording) return;
-    setIsRecording(false);
+    setIsRecording(false); 
     await recording.stopAndUnloadAsync(); // Hapus objek rekaman dari state
     const uri = recording.getURI(); // Ambil URI file audio yang direkam
     setRecording(null);
@@ -233,7 +235,7 @@ export default function ChatScreen() {
       keyboardVerticalOffset={Platform.OS === 'ios' ? 90 : 0} // sesuaikan angka dengan tinggi input bar
     >
       <FlatList
-        ref={flatListRef}
+        ref={flatListRef} 
         data={messages}
         keyExtractor={item => item.id}
         keyboardShouldPersistTaps="handled"
@@ -244,7 +246,7 @@ export default function ChatScreen() {
               <Image
                 source={{ uri: item.image }}
                 style={{ width: 180, height: 180, borderRadius: 8 }}
-
+                
               />
             </View>
           ) : item.isOption ? (
@@ -255,7 +257,7 @@ export default function ChatScreen() {
             <ChatBubble message={item.message || ''} isUser={item.isUser} />
           )
         }
-
+        
         ListHeaderComponent={
           <View style={styles.header}>
             <Image
@@ -327,7 +329,7 @@ const styles = StyleSheet.create({
   },
   input: {
     flex: 1, // input mengambil ruang sebanyak mungkin
-    backgroundColor: '#f1f1f1',
+    backgroundColor: '#f1f1f1', 
     paddingHorizontal: 15,
     borderRadius: 20, // sudut membulat
     marginRight: 10,
@@ -352,8 +354,8 @@ const styles = StyleSheet.create({
     alignSelf: 'flex-start', // pesan bot rata kiri
   },
   loadingText: {
-    fontStyle: 'italic',
-    color: '#666',
-    marginVertical: 4,
-  },
+  fontStyle: 'italic',
+  color: '#666',
+  marginVertical: 4,
+},
 });
