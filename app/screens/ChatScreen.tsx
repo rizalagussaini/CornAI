@@ -1,3 +1,5 @@
+//npx react-native start
+//npx expo start 
 import { Audio } from 'expo-av'; // untuk fitur rekam audio
 import * as ImagePicker from 'expo-image-picker';
 import React, { useEffect, useRef, useState } from 'react';
@@ -22,6 +24,8 @@ type ChatMessage = {
   isOption?: boolean;
   type?: string;
 };
+
+
 
 // Komponen utama ChatScreen
 export default function ChatScreen() {
@@ -69,6 +73,7 @@ export default function ChatScreen() {
 
   const flatListRef = useRef<FlatList>(null); // buat ref FlatList
 
+  const [threadId, setThreadId] = useState<string | null>(null); //chatAsync
 
   // Fungsi saat user memilih salah satu opsi (analisis, ai, cuaca)
   const handleOption = (type: string, message: string) => {
@@ -97,37 +102,81 @@ export default function ChatScreen() {
   };
 
   // Fungsi untuk mengirim pesan teks yang diketik user
-  const sendMessage = () => {
+  const sendMessage = async () => {
     // Jika input kosong (atau hanya spasi), jangan lakukan apa-apa
     if (!input.trim()) return;
+
+    const userMessage = input; // simpan pesan user
+
     // Tambahkan pesan user dan balasan bot ke daftar pesan
     setMessages(prev => [
       ...prev,
-      { id: Date.now().toString(), message: input, isUser: true },
+      { id: Date.now().toString(), message: userMessage, isUser: true },
     ]);
+    // Kosongkan input setelah mengirim
+    setInput('');
 
     // Set bot sedang mengetik (loading)
     setIsBotTyping(true);
 
-    // Kosongkan input setelah mengirim
-    setInput('');
+    try {
+      const response = await fetch('https://corn-ai.azurewebsites.net/api/chat', {
+        method: 'POST',
+        headers: {
+          Accept: 'application/json',
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          thread_id: threadId || '', // kirim threadId jika ada
+          message: userMessage,
+        }),
+      });
 
-    // Simulasikan delay balasan bot
-    // Simulasikan delay balasan bot (1.5 detik)
-    setTimeout(() => {
+      const json = await response.json();
+
+      // Update threadId dari response agar percakapan berlanjut
+      if (json.response.thread_id) {
+        setThreadId(json.response.thread_id);
+      }
+      // Tambah pesan balasan dari bot
       setMessages(prev => [
         ...prev,
         {
           id: Date.now().toString(),
-          message: '🤖 Terima kasih! Saya sedang memproses informasi tersebut.',
+          message: json.response.message,
           isUser: false,
         },
       ]);
-      // Sembunyikan loading indikator setelah balasan muncul
+    } catch (error) {
+      console.error(error);
+      setMessages(prev => [
+        ...prev,
+        {
+          id: Date.now().toString(),
+          message: 'Maaf, terjadi kesalahan saat menghubungi server.',
+          isUser: false,
+        },
+      ]);
+    } finally {
       setIsBotTyping(false);
-    }, 1500);
-
+    }
   };
+    // Simulasikan delay balasan bot
+    // Simulasikan delay balasan bot (1.5 detik)
+    //setTimeout(() => {
+      //setMessages(prev => [
+        //...prev,
+        //{
+          //id: Date.now().toString(),
+          //message: '🤖 Terima kasih! Saya sedang memproses informasi tersebut.',
+          //isUser: false,
+        //},
+      //]);
+      // Sembunyikan loading indikator setelah balasan muncul
+      //setIsBotTyping(false);
+    //}, 1500);
+
+  //};
 
   // Fungsi untuk memilih gambar dari galeri dan mengirim ke chat
   const handleImageUpload = async () => {
@@ -244,7 +293,6 @@ export default function ChatScreen() {
               <Image
                 source={{ uri: item.image }}
                 style={{ width: 180, height: 180, borderRadius: 8 }}
-
               />
             </View>
           ) : item.isOption ? (
