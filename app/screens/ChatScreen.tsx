@@ -3,6 +3,10 @@
 import { Audio } from 'expo-av'; // untuk fitur rekam audio
 import * as ImagePicker from 'expo-image-picker';
 import React, { useEffect, useRef, useState } from 'react';
+import Icon from 'react-native-vector-icons/MaterialIcons';  // Pastikan sudah menginstal react-native-vector-icons
+import { DrawerNavigationProp } from '@react-navigation/drawer';
+import { ParamListBase } from '@react-navigation/native';
+import { RootDrawerParamList } from './AppNavigator'; // sesuaikan path
 import {
   FlatList,
   Image,
@@ -25,10 +29,39 @@ type ChatMessage = {
   type?: string;
 };
 
+type ChatThread = {
+  id: string;
+  title: string;
+  messages: ChatMessage[];
+};
 
+type ChatScreenNavigationProp = DrawerNavigationProp<RootDrawerParamList, 'Chat'>;
+
+type Props = {
+  navigation: ChatScreenNavigationProp;
+};
 
 // Komponen utama ChatScreen
-export default function ChatScreen() {
+export default function ChatScreen({ navigation }: Props) {
+  const [threads, setThreads] = useState<ChatThread[]>([
+    {
+      id: 'thread-1',
+      title: 'Chat Baru',
+      messages: [
+        {
+          id: 'msg-0',
+          message: 'Halo! 🌽 Saya CornAI. Mulai chat baru.',
+          isUser: false,
+        },
+      ],
+    },
+  ]);
+  // Thread aktif yang sedang dibuka
+  //const [activeThreadId, setActiveThreadId] = useState(null);
+  const [activeThreadId, setActiveThreadId] = useState<string | null>(null);
+  //const [messages, setMessages] = useState<ChatMessage[]>([
+  //const activeThread = threads.find(t => t.id === activeThreadId);
+
   const [messages, setMessages] = useState<ChatMessage[]>([
     {
       id: '0',
@@ -58,13 +91,10 @@ export default function ChatScreen() {
       type: 'cuaca',
     },
   ]);
-
-  // untuk tahu kapan bot sedang "mengetik" / loading
-  const [isBotTyping, setIsBotTyping] = useState(false);
-
   // State untuk menyimpan input teks dari user
   const [input, setInput] = useState('');
-
+  // untuk tahu kapan bot sedang "mengetik" / loading
+  const [isBotTyping, setIsBotTyping] = useState(false);
   // State untuk menyimpan objek rekaman audio (null jika tidak ada)
   const [recording, setRecording] = useState<Audio.Recording | null>(null);
 
@@ -103,80 +133,107 @@ export default function ChatScreen() {
 
   // Fungsi untuk mengirim pesan teks yang diketik user
   const sendMessage = async () => {
-    // Jika input kosong (atau hanya spasi), jangan lakukan apa-apa
     if (!input.trim()) return;
 
-    const userMessage = input; // simpan pesan user
+    const userMessage = input;
+    setInput(''); // kosongkan input dulu
+    setIsBotTyping(true);
 
-    // Tambahkan pesan user dan balasan bot ke daftar pesan
+    // Jika belum ada thread ID (pertama kali user kirim pesan)
+    if (!activeThreadId) {
+      const newThreadId = 'thread-' + Date.now();
+      setActiveThreadId(newThreadId);
+      setThreads(prev => [
+        ...prev,
+        {
+          id: newThreadId,
+          title: 'Percakapan Baru',
+          messages: [
+            { id: Date.now().toString(), message: userMessage, isUser: true },
+          ],
+        },
+      ]);
+      setMessages(prev => [
+        ...prev,
+        { id: Date.now().toString(), message: userMessage, isUser: true },
+      ]);
+      return;
+    }
+
+    // Tambahkan pesan user ke thread aktif
+    setThreads(prev =>
+      prev.map(thread => {
+        if (thread.id === activeThreadId) {
+          return {
+            ...thread,
+            messages: [
+              ...thread.messages,
+              { id: Date.now().toString(), message: userMessage, isUser: true },
+            ],
+          };
+        }
+        return thread;
+      })
+    );
+
     setMessages(prev => [
       ...prev,
       { id: Date.now().toString(), message: userMessage, isUser: true },
     ]);
-    // Kosongkan input setelah mengirim
-    setInput('');
-
-    // Set bot sedang mengetik (loading)
-    setIsBotTyping(true);
 
     try {
+      console.log("test")
       const response = await fetch('https://corn-ai.azurewebsites.net/api/chat', {
+        //mode: 'no-cors',
         method: 'POST',
-        headers: {
-          Accept: 'application/json',
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          thread_id: threadId || '', // kirim threadId jika ada
-          message: userMessage,
-        }),
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ thread_id: activeThreadId, message: userMessage }),
       });
+      console.log("Mengirim ke server:", activeThreadId, userMessage);
 
       const json = await response.json();
+      const botReply = json?.response?.message ?? 'Bot tidak membalas.';
 
-      // Update threadId dari response agar percakapan berlanjut
-      if (json.response.thread_id) {
-        setThreadId(json.response.thread_id);
+      // Update threadId dari response jika diperlukan
+      if (json.response.thread_id && json.response.thread_id !== activeThreadId) {
+        // Opsional: update activeThreadId & threads jika server kirim ID baru
       }
-      // Tambah pesan balasan dari bot
-      setMessages(prev => [
-        ...prev,
-        {
-          id: Date.now().toString(),
-          message: json.response.message,
-          isUser: false,
-        },
-      ]);
+
+      // Tambahkan balasan bot ke thread aktif
+      setThreads(prev =>
+        prev.map(thread => {
+          if (thread.id === activeThreadId) {
+            return {
+              ...thread,
+              messages: [
+                ...thread.messages,
+                { id: Date.now().toString(), message: json.response.message, isUser: false },
+              ],
+            };
+          }
+          return thread;
+        })
+      );
     } catch (error) {
-      console.error(error);
-      setMessages(prev => [
-        ...prev,
-        {
-          id: Date.now().toString(),
-          message: 'Maaf, terjadi kesalahan saat menghubungi server.',
-          isUser: false,
-        },
-      ]);
+      // Tambahkan pesan error ke thread aktif
+      setThreads(prev =>
+        prev.map(thread => {
+          if (thread.id === activeThreadId) {
+            return {
+              ...thread,
+              messages: [
+                ...thread.messages,
+                { id: Date.now().toString(), message: 'Maaf, terjadi kesalahan saat menghubungi server.', isUser: false },
+              ],
+            };
+          }
+          return thread;
+        })
+      );
     } finally {
       setIsBotTyping(false);
     }
   };
-    // Simulasikan delay balasan bot
-    // Simulasikan delay balasan bot (1.5 detik)
-    //setTimeout(() => {
-      //setMessages(prev => [
-        //...prev,
-        //{
-          //id: Date.now().toString(),
-          //message: '🤖 Terima kasih! Saya sedang memproses informasi tersebut.',
-          //isUser: false,
-        //},
-      //]);
-      // Sembunyikan loading indikator setelah balasan muncul
-      //setIsBotTyping(false);
-    //}, 1500);
-
-  //};
 
   // Fungsi untuk memilih gambar dari galeri dan mengirim ke chat
   const handleImageUpload = async () => {
@@ -262,28 +319,43 @@ export default function ChatScreen() {
       </View>
     );
   };
+  const activeThread = threads.find(t => t.id === activeThreadId);
 
   useEffect(() => {
-    if (messages.length > 0) {
-      const timer = setTimeout(() => {
-        flatListRef.current?.scrollToEnd({ animated: true });
-      }, 1600); // delay 100ms biar FlatList siap render dulu
-      return () => clearTimeout(timer); // cleanup jika messages berubah cepat
+  // Update messages hanya jika activeThreadId sudah ada dan thread ditemukan
+    if (activeThreadId && activeThread) {
+      setMessages(activeThread.messages);
     }
-  }, [messages]);
+    if (flatListRef.current) {
+    flatListRef.current.scrollToEnd({ animated: true });
+    }
+    // Kalau activeThreadId null, biarkan messages tetap di default awal
+  }, [activeThreadId, activeThread]);
 
 
   // Bagian tampilan utama (UI)
   return (
-    // KeyboardAvoidingView supaya keyboard tidak menutupi input di iOS
     <KeyboardAvoidingView
       style={styles.container}
-      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-      keyboardVerticalOffset={Platform.OS === 'ios' ? 90 : 0} // sesuaikan angka dengan tinggi input bar
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      keyboardVerticalOffset={Platform.OS === 'ios' ? 90 : 0}
     >
+      {/* Header dengan tombol menu dan logo */}
+      <View style={styles.headerContainer}>
+        <TouchableOpacity onPress={() => navigation.openDrawer()} style={{ padding: 10 }}>
+          <Icon name="menu" size={30} color="#000" />
+        </TouchableOpacity>
+
+        <Image
+          source={require('../../assets/images/cornai-logo.png')}
+          style={styles.logo}
+        />
+      </View>
+
+      {/* FlatList untuk chat */}
       <FlatList
         ref={flatListRef}
-        data={messages}
+        data={activeThreadId && activeThread ? activeThread.messages : messages}
         keyExtractor={item => item.id}
         keyboardShouldPersistTaps="handled"
         contentContainerStyle={[styles.chat, { paddingBottom: 100 }]}
@@ -303,19 +375,11 @@ export default function ChatScreen() {
             <ChatBubble message={item.message || ''} isUser={item.isUser} />
           )
         }
-
-        ListHeaderComponent={
-          <View style={styles.header}>
-            <Image
-              source={require('../../assets/images/cornai-logo.png')}
-              style={styles.logo}
-            />
-          </View>
-        }
       />
 
       {renderLoading()}
 
+      {/* Input dan tombol kirim */}
       <View style={styles.inputContainer}>
         <TouchableOpacity onPress={handleImageUpload} style={{ marginRight: 8 }}>
           <Text style={{ fontSize: 18 }}>📷</Text>
@@ -338,6 +402,7 @@ export default function ChatScreen() {
       </View>
     </KeyboardAvoidingView>
   );
+
 }
 
 // Style untuk tampilan
@@ -355,10 +420,17 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   logo: {
-    width: 80,
-    height: 80,
+    width: 70,
+    height: 70,
     borderRadius: 40, // bentuk lingkaran
     marginBottom: 10,
+    position: 'absolute',
+    alignSelf: 'center',
+    left: 0,
+    right: 0,
+    marginLeft: 'auto',
+    marginRight: 'auto',
+    resizeMode: 'contain',
   },
   inputContainer: {
     position: 'absolute',   // posisi absolut supaya floating
@@ -403,5 +475,16 @@ const styles = StyleSheet.create({
     fontStyle: 'italic',
     color: '#666',
     marginVertical: 4,
+  },
+  // Tambahkan style ini:
+  headerContainer: {
+    flexDirection: 'row',       // supaya isi header berjajar horizontal
+    alignItems: 'center',       // supaya vertikal rata tengah
+    paddingHorizontal: 16,      // jarak kiri kanan
+    paddingVertical: 12,        // jarak atas bawah
+    backgroundColor: '#f5f5f5', // opsional, bisa diganti warna lain
+    borderBottomWidth: 1,       // garis bawah header
+    borderBottomColor: '#ddd',
+    position: 'relative',  // warna garis bawah
   },
 });
