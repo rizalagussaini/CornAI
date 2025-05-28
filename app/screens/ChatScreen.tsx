@@ -6,7 +6,10 @@ import React, { useEffect, useRef, useState } from 'react';
 import Icon from 'react-native-vector-icons/MaterialIcons';  // Pastikan sudah menginstal react-native-vector-icons
 import { DrawerNavigationProp } from '@react-navigation/drawer';
 import { ParamListBase } from '@react-navigation/native';
-import { RootDrawerParamList } from './AppNavigator'; // sesuaikan path
+import { RootDrawerParamList } from './AppNavigator';
+//import type { ChatThread } from './ChatScreen';
+
+
 import {
   FlatList,
   Image,
@@ -29,16 +32,19 @@ type ChatMessage = {
   type?: string;
 };
 
-type ChatThread = {
+export type ChatThread = {
   id: string;
   title: string;
   messages: ChatMessage[];
 };
 
+
+
 type ChatScreenNavigationProp = DrawerNavigationProp<RootDrawerParamList, 'Chat'>;
 
+
 type Props = {
-  navigation: ChatScreenNavigationProp;
+  navigation: DrawerNavigationProp<RootDrawerParamList, 'Chat'>;
 };
 
 // Komponen utama ChatScreen
@@ -61,6 +67,8 @@ export default function ChatScreen({ navigation }: Props) {
   const [activeThreadId, setActiveThreadId] = useState<string | null>(null);
   //const [messages, setMessages] = useState<ChatMessage[]>([
   //const activeThread = threads.find(t => t.id === activeThreadId);
+  const [menuVisible, setMenuVisible] = useState(false);
+  const toggleMenu = () => setMenuVisible(!menuVisible);
 
   const [messages, setMessages] = useState<ChatMessage[]>([
     {
@@ -180,6 +188,8 @@ export default function ChatScreen({ navigation }: Props) {
       ...prev,
       { id: Date.now().toString(), message: userMessage, isUser: true },
     ]);
+
+    
 
     try {
       console.log("test")
@@ -340,65 +350,108 @@ export default function ChatScreen({ navigation }: Props) {
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       keyboardVerticalOffset={Platform.OS === 'ios' ? 90 : 0}
     >
-      {/* Header dengan tombol menu dan logo */}
-      <View style={styles.headerContainer}>
-        <TouchableOpacity onPress={() => navigation.openDrawer()} style={{ padding: 10 }}>
-          <Icon name="menu" size={30} color="#000" />
-        </TouchableOpacity>
+      <View style={{ flex: 1 }}>
+        {/* Header dengan tombol menu dan logo */}
+        <View style={styles.headerContainer}>
+          {/* Tombol menu yang toggle bar menu */}
+          <TouchableOpacity onPress={toggleMenu} style={{ padding: 10 }}>
+            <Icon name="menu" size={30} color="#000" />
+          </TouchableOpacity>
 
-        <Image
-          source={require('../../assets/images/cornai-logo.png')}
-          style={styles.logo}
-        />
-      </View>
+          <Image
+            source={require('../../assets/images/cornai-logo.png')}
+            style={styles.logo}
+          />
+        </View>
 
-      {/* FlatList untuk chat */}
-      <FlatList
-        ref={flatListRef}
-        data={activeThreadId && activeThread ? activeThread.messages : messages}
-        keyExtractor={item => item.id}
-        keyboardShouldPersistTaps="handled"
-        contentContainerStyle={[styles.chat, { paddingBottom: 100 }]}
-        renderItem={({ item }) =>
-          item.image ? (
-            <View style={[styles.chatBubbleContainer, item.isUser ? styles.userAlign : styles.botAlign]}>
-              <Image
-                source={{ uri: item.image }}
-                style={{ width: 180, height: 180, borderRadius: 8 }}
-              />
-            </View>
-          ) : item.isOption ? (
-            <TouchableOpacity onPress={() => handleOption(item.type || '', item.message || '')}>
-              <ChatBubble message={item.message || ''} isUser={false} />
+        {/* Bar menu muncul saat tombol ditekan */}
+        {menuVisible && (
+          <View style={styles.barMenu}>
+            <TouchableOpacity
+              style={styles.barMenuItem}
+              onPress={() => {
+                setMenuVisible(false);
+                navigation.navigate({ name: 'History', params: { threads } }); // kirim data threads ke HistoryScreen
+              }}
+            >
+              <Text>New Chat</Text>
             </TouchableOpacity>
-          ) : (
-            <ChatBubble message={item.message || ''} isUser={item.isUser} />
-          )
-        }
-      />
 
-      {renderLoading()}
+            <TouchableOpacity
+              style={styles.barMenuItem}
+              onPress={() => {
+                setMenuVisible(false);
+                navigation.navigate('Search');
+              }}
+            >
+              <Text>Search History</Text>
+            </TouchableOpacity>
 
-      {/* Input dan tombol kirim */}
-      <View style={styles.inputContainer}>
-        <TouchableOpacity onPress={handleImageUpload} style={{ marginRight: 8 }}>
-          <Text style={{ fontSize: 18 }}>📷</Text>
-        </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.barMenuItem}
+              onPress={() => {
+                setMenuVisible(false);
+                //navigation.navigate('History');
+                navigation.navigate({
+                  name: 'History',
+                  params: { threads },  // threads adalah data yang ingin dikirim
+                });
+              }}
+            >
+              <Text>View History</Text>
+            </TouchableOpacity>
+          </View>
+        )}
 
-        <TouchableOpacity onPress={isRecording ? stopRecording : startRecording} style={{ marginRight: 8 }}>
-          <Text style={{ fontSize: 18 }}>{isRecording ? '⏹️' : '🎤'}</Text>
-        </TouchableOpacity>
-
-        <TextInput
-          value={input}
-          onChangeText={setInput}
-          style={styles.input}
-          placeholder="Kirim pesan..."
+        {/* FlatList untuk chat */}
+        <FlatList
+          ref={flatListRef}
+          data={activeThreadId && activeThread ? activeThread.messages : messages}
+          keyExtractor={item => item.id}
+          keyboardShouldPersistTaps="handled"
+          contentContainerStyle={[styles.chat, { paddingBottom: 100 }]}
+          renderItem={({ item }) =>
+            item.image ? (
+              <View style={[styles.chatBubbleContainer, item.isUser ? styles.userAlign : styles.botAlign]}>
+                <Image
+                  source={{ uri: item.image }}
+                  style={{ width: 180, height: 180, borderRadius: 8 }}
+                />
+              </View>
+            ) : item.isOption ? (
+              <TouchableOpacity onPress={() => handleOption(item.type || '', item.message || '')}>
+                <ChatBubble message={item.message || ''} isUser={false} />
+              </TouchableOpacity>
+            ) : (
+              <ChatBubble message={item.message || ''} isUser={item.isUser} />
+            )
+          }
         />
 
-        <TouchableOpacity onPress={sendMessage}>
-          <Text style={styles.sendButton}>➕</Text>
-        </TouchableOpacity>
+        {renderLoading()}
+        
+
+        {/* Input dan tombol kirim dalam satu bar */}
+        <View style={styles.inputContainer}>
+          <TouchableOpacity onPress={handleImageUpload} style={{ marginRight: 8 }}>
+            <Text style={{ fontSize: 18 }}>📷</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity onPress={isRecording ? stopRecording : startRecording} style={{ marginRight: 8 }}>
+            <Text style={{ fontSize: 18 }}>{isRecording ? '⏹️' : '🎤'}</Text>
+          </TouchableOpacity>
+
+          <TextInput
+            value={input}
+            onChangeText={setInput}
+            style={styles.input}
+            placeholder="Kirim pesan..."
+          />
+
+          <TouchableOpacity onPress={sendMessage}>
+            <Text style={styles.sendButton}>➕</Text>
+          </TouchableOpacity>
+        </View>
       </View>
     </KeyboardAvoidingView>
   );
@@ -432,6 +485,16 @@ const styles = StyleSheet.create({
     marginRight: 'auto',
     resizeMode: 'contain',
   },
+  barMenu: {
+  backgroundColor: '#fff',
+  borderBottomWidth: 1,
+  borderColor: '#ddd',
+},
+barMenuItem: {
+  padding: 15,
+  borderTopWidth: 1,
+  borderColor: '#ddd',
+},
   inputContainer: {
     position: 'absolute',   // posisi absolut supaya floating
     bottom: 0,              // pas di bawah layar
