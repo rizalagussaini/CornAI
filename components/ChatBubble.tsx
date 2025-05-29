@@ -1,13 +1,13 @@
 import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
 
 interface ChatBubbleProps {
 	message: string;
-	sender: 'bot' | 'user';
+	role: 'assistant' | 'user';
 }
 
-const ChatBubble: React.FC<ChatBubbleProps> = ({ message, sender }) => {
-	const isBot = sender === 'bot';
+const ChatBubble: React.FC<ChatBubbleProps> = ({ message, role }) => {
+	const isBot = role === 'assistant';
 	return (
 		<View style={[
 			styles.bubble,

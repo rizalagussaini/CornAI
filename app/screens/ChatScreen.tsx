@@ -1,5 +1,7 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
-import React, { useState } from 'react';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useFocusEffect } from '@react-navigation/native';
+import React, { useCallback, useEffect, useState } from 'react';
 import {
 	ActivityIndicator,
 	Image,
@@ -19,13 +21,13 @@ import ChatBubble from '../../components/ChatBubble';
 type ChatMessage = {
 	id: string;
 	text: string;
-	sender: 'bot' | 'user';
+	role: 'assistant' | 'user';
 };
 
 type APIResponse = {
 	status: number;
 	description: string;
-	response: APIChatResponse | null;
+	response?: APIChatResponse;
 };
 
 type APIChatResponse = {
@@ -39,7 +41,7 @@ const ChatScreen: React.FC = () => {
 		{
 			id: '1',
 			text: 'Halo! 🌽 Saya CornAI. Bagaimana saya bisa bantu hari ini?',
-			sender: 'bot',
+			role: 'assistant',
 		},
 	]);
 	const [input, setInput] = useState('');
@@ -47,8 +49,28 @@ const ChatScreen: React.FC = () => {
 	const [loading, setLoading] = useState(false);
 
 	const safeInsets = useSafeAreaInsets();
-
+	
 	// Functions
+	useFocusEffect(useCallback(() => {
+		const loadCurrentThread = async () => {
+			const storageThreadId = await AsyncStorage.getItem("current-thread");
+			setThreadId(storageThreadId);
+			console.log(`(chat) Current thread: ${storageThreadId}`);
+		}
+	
+		loadCurrentThread();
+	}, []));
+
+	useEffect(() => {
+		const loadMessageList = async () => {
+			const storageMessageList: ChatMessage[] = JSON.parse(await AsyncStorage.getItem(threadId ?? "null") ?? "[]");
+			setMessageList(storageMessageList);
+			console.log(`(chat) Loaded ${storageMessageList.length} message(s).`)
+		}
+
+		loadMessageList();
+	}, [threadId]);
+	
 	const callAPI = async (message: string) => {
 		console.log("Sending API request.")
 		console.log(`Thread ID: ${threadId}`);
@@ -69,12 +91,13 @@ const ChatScreen: React.FC = () => {
 				},
 				body: formData
 			});
+			console.log(`Response status: ${response.status}`);
 			const json = await response.json();
 
 			const responseInternal = json as APIResponse;
 			return responseInternal;
 		} catch (error) {
-			console.error(error);
+			console.error(`(chat) ${error}`);
 			return null;
 		}
 	}
@@ -85,7 +108,7 @@ const ChatScreen: React.FC = () => {
 		const userMessage: ChatMessage = {
 			id: Date.now().toString(),
 			text: input.trim(),
-			sender: 'user',
+			role: 'user',
 		};
 		
 		setInput('');
@@ -94,17 +117,39 @@ const ChatScreen: React.FC = () => {
 
 		const botResponse = await callAPI(userMessage.text);
 		console.log(botResponse);
-		if (botResponse !== null && botResponse.response !== null) {
-			setThreadId(botResponse.response.thread_id);
+		if (botResponse !== null && botResponse.response !== undefined && threadId === null) {
+			const threadId = botResponse.response.thread_id;
+			setThreadId(threadId);
+			await AsyncStorage.setItem("current-thread", threadId);
+			
+			const loadThreadList = async () => {
+				let storageThreadsStr = await AsyncStorage.getItem("thread-list");
+				if (storageThreadsStr === null) {
+					storageThreadsStr = JSON.stringify([]);
+					await AsyncStorage.setItem("thread-list", storageThreadsStr);
+				}
+				
+				return JSON.parse(storageThreadsStr);
+			};
+
+			const prev = await loadThreadList();
+			await AsyncStorage.setItem("thread-list", JSON.stringify([...prev, {
+				thread_id: threadId,
+				title: (Date.now()).toString(),
+			}]))
 		}
 		const replyText = botResponse?.response?.message;
 
 		const botReply: ChatMessage = {
 			id: (Date.now() + 1).toString(),
 			text: replyText ?? "Maaf, terjadi kesalahan pada server.",
-			sender: 'bot',
+			role: 'assistant',
 		};
 		setMessageList((prev) => [...prev, botReply]);
+		if (threadId !== null) {
+			await AsyncStorage.setItem(threadId, JSON.stringify(messageList));
+		}
+
 		setLoading(false);
 	};
 
@@ -125,7 +170,7 @@ const ChatScreen: React.FC = () => {
 
 				<ScrollView contentContainerStyle={styles.chatContainer}>
 					{messageList.map((msg) => (
-						<ChatBubble key={msg.id} message={msg.text} sender={msg.sender} />
+						<ChatBubble key={msg.id} message={msg.text} role={msg.role} />
 					))}
 				</ScrollView>
 

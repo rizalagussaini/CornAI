@@ -14,9 +14,9 @@ export default function TabLayout() {
 				}}
 			/>
 			<Tabs.Screen
-				name="chat"
+				name="threads"
 				options={{
-					title: 'Chat',
+					title: 'Percakapan',
 					tabBarIcon: ({ color, size }) => (
 						<Ionicons name="chatbubble-ellipses-outline" size={size} color={color} />
 					),
