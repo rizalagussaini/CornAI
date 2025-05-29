@@ -1,5 +1,7 @@
+import Ionicons from '@expo/vector-icons/Ionicons';
 import React, { useState } from 'react';
 import {
+	ActivityIndicator,
 	Image,
 	KeyboardAvoidingView,
 	Platform,
@@ -32,6 +34,7 @@ type APIChatResponse = {
 };
 
 const ChatScreen: React.FC = () => {
+	// States and constants
 	const [messageList, setMessageList] = useState<ChatMessage[]>([
 		{
 			id: '1',
@@ -41,7 +44,11 @@ const ChatScreen: React.FC = () => {
 	]);
 	const [input, setInput] = useState('');
 	const [threadId, setThreadId] = useState<string | null>(null);
+	const [loading, setLoading] = useState(false);
 
+	const safeInsets = useSafeAreaInsets();
+
+	// Functions
 	const callAPI = async (message: string) => {
 		console.log("Sending API request.")
 		console.log(`Thread ID: ${threadId}`);
@@ -73,16 +80,17 @@ const ChatScreen: React.FC = () => {
 	}
 
 	const handleSend = async () => {
-		if (!input.trim()) return;
+		if (!input.trim() || loading) return;
 
 		const userMessage: ChatMessage = {
 			id: Date.now().toString(),
 			text: input.trim(),
 			sender: 'user',
 		};
+		
 		setInput('');
-
 		setMessageList((prev) => [...prev, userMessage]);
+		setLoading(true);
 
 		const botResponse = await callAPI(userMessage.text);
 		console.log(botResponse);
@@ -97,9 +105,8 @@ const ChatScreen: React.FC = () => {
 			sender: 'bot',
 		};
 		setMessageList((prev) => [...prev, botReply]);
+		setLoading(false);
 	};
-
-	const safeInsets = useSafeAreaInsets();
 
 	// User Interface
 	return (
@@ -132,8 +139,12 @@ const ChatScreen: React.FC = () => {
 						value={input}
 						onChangeText={setInput}
 					/>
-					<TouchableOpacity onPress={handleSend} style={styles.sendButton}>
-						<Text style={styles.sendText}>+</Text>
+					<TouchableOpacity onPress={handleSend} style={[styles.sendButton, loading && styles.sendButtonDisabled]} disabled={loading}>
+						{loading ? (
+							<ActivityIndicator size="small" color="white" />
+						) : (
+							<Ionicons name="send" size={16} color="white" />
+						)}
 					</TouchableOpacity>
 				</View>
 			</View>
@@ -202,10 +213,8 @@ const styles = StyleSheet.create({
 		alignItems: 'center',
 		justifyContent: 'center',
 	},
-	sendText: {
-		color: '#fff',
-		fontSize: 24,
-		fontWeight: 'bold',
+	sendButtonDisabled: {
+		backgroundColor: '#4ad36a',
 	}
 });
 
