@@ -1,15 +1,17 @@
 import React, { useState } from 'react';
 import {
-	View,
-	Text,
-	StyleSheet,
 	Image,
 	KeyboardAvoidingView,
 	Platform,
+	ScrollView,
+	StyleSheet,
+	Text,
 	TextInput,
 	TouchableOpacity,
-	ScrollView,
+	View,
 } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+
 import ChatBubble from '../../components/ChatBubble';
 
 type ChatMessage = {
@@ -97,6 +99,8 @@ const ChatScreen: React.FC = () => {
 		setMessageList((prev) => [...prev, botReply]);
 	};
 
+	const safeInsets = useSafeAreaInsets();
+
 	// User Interface
 	return (
 		<KeyboardAvoidingView
@@ -105,7 +109,7 @@ const ChatScreen: React.FC = () => {
 			keyboardVerticalOffset={Platform.OS === 'ios' ? 90 : 0}
 		>
 			<View style={styles.container}>
-				<View style={styles.header}>
+				<View style={[styles.header, { marginTop: safeInsets.top }]}>
 					<Image
 						source={require('../../assets/images/cornai-logo.png')}
 						style={styles.logo}
@@ -145,7 +149,7 @@ const styles = StyleSheet.create({
 	header: {
 		flexDirection: 'row',
 		alignItems: 'center',
-		padding: 12,
+		padding: 10,
 		borderBottomWidth: 1,
 		borderColor: '#eee',
 	},
@@ -173,8 +177,8 @@ const styles = StyleSheet.create({
 		marginHorizontal: 4,
 	},
 	logo: {
-		width: 70,
-		height: 70,
+		width: 60,
+		height: 60,
 		borderRadius: 40,
 		marginVertical: 10,
 		marginHorizontal: 'auto',
