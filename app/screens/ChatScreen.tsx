@@ -44,7 +44,8 @@ const ChatScreen: React.FC = () => {
 		console.log("Sending API request.")
 		console.log(`Thread ID: ${threadId}`);
 		console.log(`Message: ${message}`);
-
+		
+		const chatEndpoint = process.env.EXPO_PUBLIC_AZURE_API_ENDPOINT + "chat";
 		const formData = new FormData();
 		formData.append("message", message);
 		if (threadId !== null) {
@@ -52,7 +53,7 @@ const ChatScreen: React.FC = () => {
 		}
 
 		try {
-			const response = await fetch("https://corn-ai.azurewebsites.net/api/chat", {
+			const response = await fetch(chatEndpoint, {
 				method: 'POST',
 				headers: {
 					'Accept': 'application/json'
