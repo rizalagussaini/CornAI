@@ -1,52 +1,52 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
 
 interface ChatBubbleProps {
-  message: string;
-  isUser: boolean;
-  onPress?: () => void;
+	message?: string;
+	role: 'assistant' | 'user';
 }
 
-const ChatBubble: React.FC<ChatBubbleProps> = ({ message, isUser, onPress }) => {
-  const Wrapper = onPress ? TouchableOpacity : View;
-
-  return (
-    <View style={[styles.container, isUser ? styles.right : styles.left]}>
-      <Wrapper
-        style={[styles.bubble, isUser ? styles.userBubble : styles.botBubble]}
-        onPress={onPress}
-      >
-        <Text style={styles.text}>{message}</Text>
-      </Wrapper>
-    </View>
-  );
+const ChatBubble: React.FC<ChatBubbleProps> = ({ message = "", role }) => {
+	const isBot = role === 'assistant';
+	return (
+		<View style={[
+			styles.bubble,
+			isBot ? styles.botBubble : styles.userBubble,
+		]}>
+			<Text style={[
+				styles.message,
+				isBot ? styles.botMessage : styles.userMessage
+			]}>
+				{message}
+			</Text>
+		</View>
+	);
 };
 
 const styles = StyleSheet.create({
-  container: {
-    marginVertical: 4,
-    maxWidth: '80%',
-  },
-  right: {
-    alignSelf: 'flex-end',
-  },
-  left: {
-    alignSelf: 'flex-start',
-  },
-  bubble: {
-    padding: 10,
-    borderRadius: 12,
-  },
-  userBubble: {
-    backgroundColor: '#dcf8c6',
-  },
-  botBubble: {
-    backgroundColor: '#f1f0f0',
-  },
-  text: {
-    fontSize: 14,
-    color: '#333',
-  },
+	bubble: {
+		borderRadius: 16,
+		padding: 12,
+		marginBottom: 10,
+		maxWidth: '80%'
+	},
+	botBubble: {
+		backgroundColor: '#f0f0f0',
+		alignSelf: 'flex-start'
+	},
+	userBubble: {
+		backgroundColor: '#007bff',
+		alignSelf: 'flex-end'
+	},
+	message: {
+		fontSize: 16,
+	},
+	botMessage: {
+		color: '#333'
+	},
+	userMessage: {
+		color: '#fff'
+	},
 });
 
 export default ChatBubble;
