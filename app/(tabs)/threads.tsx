@@ -27,7 +27,15 @@ type MessageContent = {
 	image_url?: {
 		url: string;
 	}
-}
+};
+
+type ChatBubbleMessage = {
+	id: string;
+	type: 'text' | 'image'
+	text?: string;
+	base64Image?: string;
+	role: string;
+};
 
 const ThreadListScreen: React.FC = () => {
 	const [threads, setThreads] = useState<Thread[]>([]);
@@ -86,21 +94,33 @@ const ThreadListScreen: React.FC = () => {
 			await AsyncStorage.setItem("current-thread", threadId);
 			
 			const threadHistory = await callChatHistoryAPI(threadId);
-			let threadHistoryInternal: object[] = [];
+			let threadHistoryInternal: ChatBubbleMessage[] = [];
 			if (threadHistory !== null) {
 				threadHistory.forEach(tm => {
 					let textContent = "";
+					let imageContent = "";
 					tm.content.forEach(mc => {
 						if (mc.type === "text") {
 							textContent += mc.text;
+						} else if (mc.type ===  "image_url" && mc.image_url) {
+							imageContent = mc.image_url.url;
 						}
 					});
 					if (textContent.length > 0) {
 						threadHistoryInternal.push({
 							id: tm.id,
+							type: 'text',
 							text: textContent,
 							role: tm.role
-						})
+						});
+					}
+					if (imageContent.length > 0) {
+						threadHistoryInternal.push({
+							id: `img_${tm.id}`,
+							type: 'image',
+							base64Image: imageContent,
+							role: tm.role
+						});
 					}
 				});
 	

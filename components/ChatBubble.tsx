@@ -2,11 +2,11 @@ import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 
 interface ChatBubbleProps {
-	message: string;
+	message?: string;
 	role: 'assistant' | 'user';
 }
 
-const ChatBubble: React.FC<ChatBubbleProps> = ({ message, role }) => {
+const ChatBubble: React.FC<ChatBubbleProps> = ({ message = "", role }) => {
 	const isBot = role === 'assistant';
 	return (
 		<View style={[
