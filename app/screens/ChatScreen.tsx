@@ -17,39 +17,23 @@ import {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import ChatBubble from '../../components/ChatBubble';
+import { APIResponse } from '../../types/APIResponses';
 
-type ChatMessage = {
+type ChatBubbleTextMessage = {
 	id: string;
 	text: string;
 	role: 'assistant' | 'user';
 };
 
-type APIResponse = {
-	status: number;
-	description: string;
-	response?: APIChatResponse;
-};
-
-type APIChatResponse = {
-	thread_id: string;
-	message: string;
-};
-
 const ChatScreen: React.FC = () => {
 	// States and constants
-	const [messageList, setMessageList] = useState<ChatMessage[]>([
-		{
-			id: '1',
-			text: 'Halo! 🌽 Saya CornAI. Bagaimana saya bisa bantu hari ini?',
-			role: 'assistant',
-		},
-	]);
+	const [messageList, setMessageList] = useState<ChatBubbleTextMessage[]>([]);
 	const [input, setInput] = useState('');
 	const [threadId, setThreadId] = useState<string | null>(null);
 	const [loading, setLoading] = useState(false);
 
 	const safeInsets = useSafeAreaInsets();
-	
+
 	// Functions
 	useFocusEffect(useCallback(() => {
 		const loadCurrentThread = async () => {
@@ -63,7 +47,7 @@ const ChatScreen: React.FC = () => {
 
 	useEffect(() => {
 		const loadMessageList = async () => {
-			const storageMessageList: ChatMessage[] = JSON.parse(await AsyncStorage.getItem(threadId ?? "null") ?? "[]");
+			const storageMessageList: ChatBubbleTextMessage[] = JSON.parse(await AsyncStorage.getItem(threadId ?? "null") ?? "[]");
 			setMessageList(storageMessageList);
 			console.log(`(chat) Loaded ${storageMessageList.length} message(s).`)
 		}
@@ -105,7 +89,7 @@ const ChatScreen: React.FC = () => {
 	const handleSend = async () => {
 		if (!input.trim() || loading) return;
 
-		const userMessage: ChatMessage = {
+		const userMessage: ChatBubbleTextMessage = {
 			id: Date.now().toString(),
 			text: input.trim(),
 			role: 'user',
@@ -140,7 +124,7 @@ const ChatScreen: React.FC = () => {
 		}
 		const replyText = botResponse?.response?.message;
 
-		const botReply: ChatMessage = {
+		const botReply: ChatBubbleTextMessage = {
 			id: (Date.now() + 1).toString(),
 			text: replyText ?? "Maaf, terjadi kesalahan pada server.",
 			role: 'assistant',
